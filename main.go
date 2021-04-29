@@ -56,7 +56,7 @@ func main() {
 	fo := os.Stdout
 
 	if outputFile != "" {
-		fo, err = os.Open(outputFile)
+		fo, err = os.OpenFile(outputFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
 		if err != nil {
 			printErr("Unable to open file: %s", err)
 			os.Exit(1)
@@ -65,10 +65,10 @@ func main() {
 	}
 
 	w := csv.NewWriter(fo)
-	w.Write(header)
+	_ = w.Write(header)
 
 	for _, v := range list {
-		w.Write(v)
+		_ = w.Write(v)
 	}
 
 	w.Flush()
