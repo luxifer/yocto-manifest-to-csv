@@ -1,12 +1,11 @@
 package main
 
 import (
-	"bufio"
-	"encoding/csv"
 	"flag"
 	"fmt"
 	"os"
-	"strings"
+
+	parser "github.com/luxifer/yocto-manifest-to-csv"
 )
 
 var inputFile string
@@ -26,33 +25,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	defer fi.Close()
-
-	s := bufio.NewScanner(fi)
-
-	var list [][]string
-	lastItem := make([]string, 0)
-	header := make([]string, 0)
-	var headerDone bool
-
-	for s.Scan() {
-		line := s.Text()
-
-		if line == "" {
-			list = append(list, lastItem)
-			lastItem = make([]string, 0)
-			headerDone = true
-			continue
-		}
-
-		splits := strings.SplitN(line, ":", 2)
-		lastItem = append(lastItem, strings.TrimLeft(splits[1], " "))
-
-		if !headerDone {
-			header = append(header, splits[0])
-		}
-	}
-
 	fo := os.Stdout
 
 	if outputFile != "" {
@@ -64,14 +36,7 @@ func main() {
 		defer fo.Close()
 	}
 
-	w := csv.NewWriter(fo)
-	_ = w.Write(header)
-
-	for _, v := range list {
-		_ = w.Write(v)
-	}
-
-	w.Flush()
+	_ = parser.Parse(fi, fo)
 }
 
 func printErr(format string, args ...interface{}) {
